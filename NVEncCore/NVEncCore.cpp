@@ -246,7 +246,6 @@ NVEncoderGPUInfo::NVEncoderGPUInfo(int deviceId, bool getFeatures) {
         CUdevice cuDevice = 0;
         cudaDeviceProp devProp;
         if ((deviceId < 0 || deviceId == currentDevice)
-            && cudaSuccess == cudaDeviceGetPCIBusId(pci_bus_name, sizeof(pci_bus_name), currentDevice)
             && CUDA_SUCCESS == cuDeviceGet(&cuDevice, currentDevice)
             && CUDA_SUCCESS == cudaGetDeviceProperties(&devProp, cuDevice)
             && (((devProp.major << 4) + devProp.minor) >= 0x30)) {
@@ -258,7 +257,9 @@ NVEncoderGPUInfo::NVEncoderGPUInfo(int deviceId, bool getFeatures) {
 
             NVGPUInfo gpu;
             gpu.id = currentDevice;
-            gpu.pciBusId = pci_bus_name;
+			if (cudaSuccess == cudaDeviceGetPCIBusId(pci_bus_name, sizeof(pci_bus_name), currentDevice)) {
+				gpu.pciBusId = pci_bus_name;
+			}
             gpu.name = char_to_tstring(devProp.name);
             gpu.compute_capability.first = devProp.major;
             gpu.compute_capability.second = devProp.minor;
